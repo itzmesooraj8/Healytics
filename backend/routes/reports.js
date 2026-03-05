@@ -5,14 +5,45 @@ const { supabase } = require("../lib/supabase");
 const mockReports = new Map(); // userId → report[]
 
 // ── Gemini AI helper ──────────────────────────────────────────────────────────
+// Parse a normalRange string like "70-99" or "<5" into { min, max }
+function parseRange(normalRange) {
+  if (!normalRange) return { min: null, max: null };
+  const parts = String(normalRange).split("-").map((s) => parseFloat(s.trim()));
+  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]))
+    return { min: parts[0], max: parts[1] };
+  const ltMatch = String(normalRange).match(/<([\d.]+)/);
+  if (ltMatch) return { min: null, max: parseFloat(ltMatch[1]) };
+  return { min: null, max: null };
+}
+
+// Normalise a single marker so min/max/status are always present
+function normaliseMarker(m) {
+  const range = parseRange(m.normalRange || m.referenceRange);
+  const minVal = m.min ?? range.min;
+  const maxVal = m.max ?? range.max;
+  const val = parseFloat(m.value);
+  let status = m.status;
+  if (!status) {
+    if (isNaN(val) || (minVal === null && maxVal === null)) status = "NORMAL";
+    else if (maxVal !== null && val > maxVal) status = "HIGH";
+    else if (minVal !== null && val < minVal) status = "LOW";
+    else status = "NORMAL";
+  } else {
+    status = String(status).toUpperCase();
+    if (!["HIGH", "LOW", "NORMAL"].includes(status)) status = "NORMAL";
+  }
+  return { ...m, min: minVal, max: maxVal, status };
+}
+
 async function callGeminiAI(profileName, markers) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const markerText = markers
+  const normalised = markers.map(normaliseMarker);
+  const markerText = normalised
     .map(
       (m) =>
-        `${m.name}: ${m.value} ${m.unit} [Ref: ${m.min}–${m.max}] → ${m.status}`
+        `${m.name}: ${m.value} ${m.unit || ""} [Ref: ${m.min ?? "?"}–${m.max ?? "?"}] → ${m.status}`
     )
     .join("\n");
 
@@ -20,7 +51,7 @@ async function callGeminiAI(profileName, markers) {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,7 +61,14 @@ async function callGeminiAI(profileName, markers) {
       }
     );
     const json = await res.json();
-    return json?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    if (!res.ok) {
+      console.error("Gemini API error response:", JSON.stringify(json));
+      return null;
+    }
+    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    if (text) console.log("✅ Gemini responded (", text.length, "chars)");
+    else console.warn("Gemini returned no text:", JSON.stringify(json));
+    return text;
   } catch (err) {
     console.error("Gemini API error:", err.message);
     return null;
@@ -95,15 +133,18 @@ router.post("/analyze", async (req, res) => {
       if (rErr) throw rErr;
 
       // Insert markers
-      const markerRows = markers.map((m) => ({
-        report_id: report.id,
-        marker_name: m.name,
-        value: m.value,
-        unit: m.unit,
-        min_range: m.min,
-        max_range: m.max,
-        status: m.status,
-      }));
+      const markerRows = markers.map((m) => {
+        const nm = normaliseMarker(m);
+        return {
+          report_id: report.id,
+          marker_name: nm.name,
+          value: String(nm.value),
+          unit: nm.unit || null,
+          min_range: nm.min !== null ? String(nm.min) : "0",
+          max_range: nm.max !== null ? String(nm.max) : "0",
+          status: nm.status,
+        };
+      });
 
       const { error: mErr } = await supabase
         .from("lab_markers")
