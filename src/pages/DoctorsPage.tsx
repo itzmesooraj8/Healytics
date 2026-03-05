@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MOCK_DOCTORS } from "@/data/mockData";
 import { doctorsAPI, type DoctorAPI } from "@/lib/api";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
+import PublicNavbar from "@/components/PublicNavbar";
 
 const specialties = ["All", "Endocrinologist", "Cardiologist", "General Physician", "Hematologist", "Diabetologist", "Nephrologist", "Nutritionist", "Internal Medicine"];
 
@@ -29,17 +30,7 @@ const DoctorsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 md:px-12" style={{ background: "rgba(10,10,10,0.8)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-primary text-xl">⚕</span>
-          <span className="font-heading font-bold text-primary text-lg">Healytics</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">Sign In</Link>
-          <Link to="/register" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium">Get Started</Link>
-        </div>
-      </nav>
+      <PublicNavbar />
 
       <div className="pt-24 px-6 md:px-12 max-w-7xl mx-auto pb-12">
         <div className="aurora-bg rounded-2xl p-8 mb-8">

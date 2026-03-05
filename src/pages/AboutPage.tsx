@@ -1,15 +1,11 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { Users, Target, Award, Heart, Globe, Zap } from "lucide-react";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
-import ThemeToggle from "@/components/ThemeToggle";
+import PublicNavbar from "@/components/PublicNavbar";
 
 const AboutPage = () => (
   <div className="min-h-screen bg-background">
-    <nav className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 md:px-12 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <Link to="/" className="flex items-center gap-2"><span className="text-primary text-xl">⚕</span><span className="font-heading font-bold text-foreground">Healytics</span></Link>
-      <div className="flex items-center gap-3"><ThemeToggle /><Link to="/login" className="text-sm text-muted-foreground">Sign In</Link></div>
-    </nav>
+    <PublicNavbar />
 
     <div className="pt-24 pb-20 px-6 md:px-12 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -49,8 +49,18 @@ const RegisterPage = () => {
 
   return (
     <div className="aurora-bg min-h-screen flex items-center justify-center px-4">
-      <div className="fixed top-4 right-4 z-50"><ThemeToggle /></div>
-      <div className="relative z-10 glass-card p-8 w-full max-w-md">
+      {/* Top navigation bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 md:px-8 bg-background/70 backdrop-blur-xl border-b border-border/40">
+        <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-primary text-lg">⚕</span>
+          <span className="font-heading font-semibold text-foreground text-sm">Healytics</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link to="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">Sign in →</Link>
+        </div>
+      </div>      <div className="flex-1 flex items-center justify-center px-4 py-8">      <div className="relative z-10 glass-card p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-primary text-2xl">⚕</span>
           <h2 className="font-heading text-2xl font-bold text-foreground mt-2">Create Your Account</h2>
@@ -120,6 +130,7 @@ const RegisterPage = () => {
           <p className="text-muted-foreground text-xs text-center">By registering you agree to our Terms of Service</p>
           <p className="text-center text-sm text-muted-foreground">Already have an account? <Link to="/login" className="text-primary hover:underline">Sign In →</Link></p>
         </div>
+      </div>
       </div>
       <div className="fixed bottom-0 left-0 right-0"><MedicalDisclaimer /></div>
     </div>
