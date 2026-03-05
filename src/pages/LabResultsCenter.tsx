@@ -12,7 +12,7 @@ import AIChatBubble from "@/components/AIChatBubble";
 import PrintSummaryCard from "@/components/PrintSummaryCard";
 import { reportsAPI, getUser } from "@/lib/api";
 import {
-  DIABETIC_PROFILE, CARDIAC_PROFILE, VITAMIN_PROFILE,
+  DIABETIC_PROFILE, CARDIAC_PROFILE, VITAMIN_PROFILE, SKIN_CANCER_PROFILE,
   AI_EXPLANATIONS, ACTIONABLE_INSIGHTS, WEARABLE_DATA,
   type LabProfile, type LabMarker
 } from "@/data/mockData";
@@ -25,6 +25,7 @@ const PREVIOUS_VALUES: Record<string, Record<string, number>> = {
   diabetic: { "Glucose (Fasting)": 192, "HbA1c": 8.5, "LDL Cholesterol": 148, "HDL Cholesterol": 36, "Triglycerides": 220, "Hemoglobin": 12.9, "Vitamin D": 12, "TSH": 3.4, "WBC": 7.5, "Creatinine": 1.3 },
   cardiac: { "LDL Cholesterol": 185, "HDL Cholesterol": 30, "Triglycerides": 295, "hsCRP": 5.2, "Troponin I": 0.01, "BNP": 88, "Homocysteine": 19, "Fibrinogen": 430 },
   vitamin: { "Vitamin D": 9, "Vitamin B12": 135, "Folate": 2.5, "Iron (Serum)": 38, "Ferritin": 5, "Hemoglobin": 9.5, "Calcium": 7.9, "Magnesium": 1.5 },
+  skin_cancer: { "S-100B Protein": 0.55, "LDH": 318, "WBC": 13.4, "Platelets": 460, "Hemoglobin": 10.5, "ALT (Liver)": 62, "Vitamin D": 12, "Albumin": 2.9, "Ferritin": 340, "ESR": 80 },
 };
 
 const LabResultsCenter = () => {
@@ -38,6 +39,7 @@ const LabResultsCenter = () => {
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<LabMarker | null>(null);
   const [wearableSynced, setWearableSynced] = useState(false);
   const [syncingWearable, setSyncingWearable] = useState(false);
@@ -103,18 +105,37 @@ const LabResultsCenter = () => {
     }
   };
 
+  // Load voices — getVoices() is async; must wait for voiceschanged event
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) setAvailableVoices(voices);
+    };
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+  }, []);
+
   useEffect(() => { runAnalysis(DIABETIC_PROFILE); }, [runAnalysis]);
 
   const handleVoice = () => {
-    if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
-    else {
-      const utterance = new SpeechSynthesisUtterance(aiExplanation);
-      utterance.lang = selectedLanguage;
-      utterance.rate = 0.9;
-      utterance.onend = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
-    }
+    if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); return; }
+    const utterance = new SpeechSynthesisUtterance(aiExplanation);
+    utterance.lang = selectedLanguage;
+    utterance.rate = 0.9;
+
+    // Find the best matching voice for the chosen language
+    const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
+    const exactMatch = voices.find(v => v.lang === selectedLanguage);
+    const partialMatch = voices.find(v => v.lang.startsWith(selectedLanguage.split("-")[0]));
+    if (exactMatch) utterance.voice = exactMatch;
+    else if (partialMatch) utterance.voice = partialMatch;
+    // If no native voice found, the browser will still attempt TTS with the lang hint
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
   };
 
   const handleExport = () => {
@@ -173,6 +194,7 @@ const LabResultsCenter = () => {
           { profile: DIABETIC_PROFILE, label: "🩸 Diabetic Profile", activeClass: "bg-primary text-primary-foreground border-primary" },
           { profile: CARDIAC_PROFILE, label: "❤️ Cardiac Panel", activeClass: "bg-destructive text-destructive-foreground border-destructive" },
           { profile: VITAMIN_PROFILE, label: "💊 Vitamin Deficiency", activeClass: "bg-[hsl(var(--accent-amber))] text-background border-[hsl(var(--accent-amber))]" },
+          { profile: SKIN_CANCER_PROFILE, label: "🔬 Skin Cancer Panel", activeClass: "bg-purple-600 text-white border-purple-600" },
         ].map(btn => (
           <button key={btn.profile.id} onClick={() => runAnalysis(btn.profile)}
             className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all cursor-pointer ${activeProfile.id === btn.profile.id ? btn.activeClass : "border-border text-muted-foreground hover:border-primary"}`}
@@ -222,8 +244,8 @@ const LabResultsCenter = () => {
                 <h3 className="font-heading font-bold text-foreground mb-4">Overall Health Score</h3>
                 <div className="w-48 h-48 mx-auto relative">
                   <ResponsiveContainer>
-                    <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ value: activeProfile.healthScore, fill: scoreColor }]} startAngle={180} endAngle={0}>
-                      <RadialBar dataKey="value" cornerRadius={10} background={{ fill: "hsl(var(--muted))" }} isAnimationActive animationDuration={1500} />
+                    <RadialBarChart key={activeProfile.id} innerRadius="70%" outerRadius="100%" data={[{ value: activeProfile.healthScore, fill: scoreColor }]} startAngle={180} endAngle={0}>
+                      <RadialBar dataKey="value" cornerRadius={10} background={{ fill: "hsl(var(--muted))" }} isAnimationActive animationBegin={200} animationDuration={1500} />
                     </RadialBarChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -323,7 +345,7 @@ const LabResultsCenter = () => {
                   {isSpeaking ? "⏹ Stop Reading" : "🔊 Read Aloud"}
                 </button>
                 <div className="flex gap-2">
-                  {[{ code: "en-US", label: "🇬🇧 English" }, { code: "ta-IN", label: "🇮🇳 Tamil" }, { code: "hi-IN", label: "🇮🇳 Hindi" }].map(lang => (
+                  {[{ code: "en-US", label: "🇬🇧 English" }, { code: "ta-IN", label: "🇮🇳 Tamil" }, { code: "hi-IN", label: "🇮🇳 Hindi" }, { code: "te-IN", label: "🇮🇳 Telugu" }, { code: "ml-IN", label: "🇮🇳 Malayalam" }].map(lang => (
                     <button key={lang.code} onClick={() => setSelectedLanguage(lang.code)}
                       className={`px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${selectedLanguage === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
                     >{lang.label}</button>

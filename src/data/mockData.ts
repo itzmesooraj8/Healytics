@@ -72,10 +72,31 @@ export const VITAMIN_PROFILE: LabProfile = {
   rawText: "Patient: Priya Suresh | Age: 34 | Sex: F | Date: 01/03/2026\nVitamin D: 11 ng/mL [Ref: 30-100] L\nVitamin B12: 142 pg/mL [Ref: 200-900] L\nFolate: 2.8 ng/mL [Ref: 3.0-17.0] L\nIron: 42 μg/dL [Ref: 60-170] L\nFerritin: 6 ng/mL [Ref: 12-150] L\nHemoglobin: 9.8 g/dL [Ref: 12.0-16.0] L\nCalcium: 8.1 mg/dL [Ref: 8.5-10.5] L\nMagnesium: 1.6 mg/dL [Ref: 1.7-2.2] L",
 };
 
+export const SKIN_CANCER_PROFILE: LabProfile = {
+  id: "skin_cancer",
+  name: "Skin Cancer / Melanoma Panel — Arjun Mehta, 45M",
+  date: "March 4, 2026",
+  markers: [
+    { name: "S-100B Protein", value: 0.42, unit: "μg/L", min: 0, max: 0.10, status: "HIGH" },
+    { name: "LDH", value: 292, unit: "U/L", min: 140, max: 240, status: "HIGH" },
+    { name: "WBC", value: 12.1, unit: "10³/μL", min: 4.5, max: 11.0, status: "HIGH" },
+    { name: "Platelets", value: 438, unit: "10³/μL", min: 150, max: 400, status: "HIGH" },
+    { name: "Hemoglobin", value: 11.0, unit: "g/dL", min: 13.5, max: 17.5, status: "LOW" },
+    { name: "ALT (Liver)", value: 56, unit: "U/L", min: 10, max: 40, status: "HIGH" },
+    { name: "Vitamin D", value: 15, unit: "ng/mL", min: 30, max: 100, status: "LOW" },
+    { name: "Albumin", value: 3.1, unit: "g/dL", min: 3.5, max: 5.0, status: "LOW" },
+    { name: "Ferritin", value: 310, unit: "ng/mL", min: 12, max: 300, status: "HIGH" },
+    { name: "ESR", value: 68, unit: "mm/hr", min: 0, max: 15, status: "HIGH" },
+  ],
+  healthScore: 29,
+  rawText: "Patient: Arjun Mehta | Age: 45 | Sex: M | Date: 04/03/2026\nS-100B Protein: 0.42 μg/L [Ref: <0.10] H\nLDH: 292 U/L [Ref: 140-240] H\nWBC: 12.1 10³/μL [Ref: 4.5-11.0] H\nPlatelets: 438 10³/μL [Ref: 150-400] H\nHemoglobin: 11.0 g/dL [Ref: 13.5-17.5] L\nALT: 56 U/L [Ref: 10-40] H\nVitamin D: 15 ng/mL [Ref: 30-100] L\nAlbumin: 3.1 g/dL [Ref: 3.5-5.0] L\nFerritin: 310 ng/mL [Ref: 12-300] H\nESR: 68 mm/hr [Ref: 0-15] H",
+};
+
 export const AI_EXPLANATIONS: Record<string, string> = {
   diabetic: "Rajesh's results show his blood sugar is significantly elevated — his fasting glucose of 186 mg/dL is nearly double the healthy limit of 100 mg/dL, and his HbA1c of 8.2% confirms his blood sugar has been consistently high for the past 3 months. His kidneys are showing early strain with a slightly elevated creatinine. His 'good' cholesterol (HDL) is too low while his 'bad' cholesterol (LDL) is too high, increasing his heart risk. His Vitamin D is critically deficient. These results together suggest poorly controlled Type 2 Diabetes with early complications. Please discuss with your doctor urgently.",
   cardiac: "Meena's heart health panel shows several concerning signals. Her LDL 'bad' cholesterol is critically high at 178 mg/dL, nearly double the safe limit. Her hsCRP of 4.8 indicates significant inflammation in her blood vessels — a key risk factor for heart attack. Her homocysteine is elevated, which damages artery walls over time. The good news is that her troponin and BNP are normal, meaning there is no evidence of an active cardiac event. However, her overall cardiovascular risk profile requires immediate medical attention and lifestyle changes.",
   vitamin: "Priya has multiple severe nutritional deficiencies. Her Vitamin D is critically low at 11 ng/mL — she needs at least 30 ng/mL for bone and immune health. Her B12 at 142 pg/mL is deficient, which can cause fatigue, nerve tingling, and memory problems. Her iron and ferritin are both very low, explaining likely symptoms of tiredness and weakness. Her hemoglobin of 9.8 indicates iron-deficiency anemia. All eight markers in this panel are below the healthy range. This requires medical supplementation and dietary changes — this cannot be corrected by diet alone.",
+  skin_cancer: "Arjun's panel shows several markers that require urgent specialist review. The S-100B Protein at 0.42 μg/L is more than 4x the normal threshold — this is a validated serum biomarker for melanoma activity and disease progression. Elevated LDH at 292 U/L is an independent prognostic indicator in melanoma, often associated with a higher tumour burden. His raised WBC, ESR, and platelets suggest active systemic inflammation. The low hemoglobin and albumin indicate nutritional compromise common during oncological stress. Elevated liver enzymes (ALT) warrant a hepatic ultrasound to rule out metastatic spread. This panel should be discussed immediately with a dermatologist-oncologist. These are laboratory markers — diagnosis requires biopsy and imaging confirmation.",
 };
 
 export const ACTIONABLE_INSIGHTS: Record<string, string[]> = {
@@ -97,6 +118,13 @@ export const ACTIONABLE_INSIGHTS: Record<string, string[]> = {
     "B12 deficiency can cause permanent nerve damage if untreated. Injections may be needed if oral supplements are insufficient.",
     "Iron-deficiency anemia confirmed. Increase dietary iron: spinach, lentils, pomegranate. Take with Vitamin C for absorption.",
     "All deficiencies are severe — this panel requires a follow-up appointment, not just dietary changes.",
+  ],
+  skin_cancer: [
+    "S-100B Protein 4x above normal — this is a melanoma progression marker. Consult a dermatologist-oncologist immediately.",
+    "Elevated LDH is a staging indicator in melanoma. Do not delay — request a full-body PET-CT scan referral.",
+    "Raised ALT — a liver ultrasound is needed to rule out hepatic metastasis.",
+    "Low albumin and hemoglobin indicate nutritional stress. High-protein diet and iron-rich foods are important during treatment.",
+    "Vitamin D deficiency is common in cancer patients and may worsen prognosis — discuss supplementation with your oncologist.",
   ],
 };
 
@@ -135,4 +163,4 @@ export const HEALTH_TREND_DATA = [
   { month: "Mar", glucose: 180, hba1c: 8.0, cholesterol: 170 },
 ];
 
-export const LAB_PROFILES = [DIABETIC_PROFILE, CARDIAC_PROFILE, VITAMIN_PROFILE];
+export const LAB_PROFILES = [DIABETIC_PROFILE, CARDIAC_PROFILE, VITAMIN_PROFILE, SKIN_CANCER_PROFILE];

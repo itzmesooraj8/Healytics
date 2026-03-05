@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -58,6 +58,31 @@ const DashboardLayout = () => {
   const effectiveCollapsed = isMobile ? !mobileOpen : collapsed;
   const pageTitle = pageTitles[location.pathname] || "Healytics";
   const currentUser = getUser();
+
+  // ── Protected Route Guard ──────────────────────────────────────────────────
+  useEffect(() => {
+    const token = localStorage.getItem("healytics_token");
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+    // Check token expiry (JWT payload is base64 in the middle segment)
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp && Date.now() / 1000 > payload.exp) {
+        localStorage.removeItem("healytics_token");
+        localStorage.removeItem("healytics_user");
+        toast({ title: "Session expired", description: "Please log in again.", variant: "destructive" });
+        navigate("/login", { replace: true });
+      }
+    } catch {
+      // Malformed token — clear and redirect
+      localStorage.removeItem("healytics_token");
+      localStorage.removeItem("healytics_user");
+      navigate("/login", { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
   const displayName = currentUser?.name || "Rajesh Kumar";
   const initials = displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 

@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
+
+const SETTINGS_KEY = "healytics_settings";
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useTheme();
-  const [settings, setSettings] = useState({
-    notifications: true,
-    voice: true,
-    datasharing: false,
-    email: true,
+  const { toast } = useToast();
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      return saved
+        ? JSON.parse(saved)
+        : { notifications: true, voice: true, datasharing: false, email: true };
+    } catch {
+      return { notifications: true, voice: true, datasharing: false, email: true };
+    }
   });
 
   const toggles = [
@@ -23,9 +31,22 @@ const SettingsPage = () => {
     if (id === "darkmode") {
       toggleTheme();
     } else {
-      setSettings(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
+      setSettings((prev: Record<string, boolean>) => {
+        const next = { ...prev, [id]: !prev[id] };
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+        return next;
+      });
     }
+    toast({ title: "Setting saved", description: "Preference updated." });
   };
+
+  // Persist on first load to initialise localStorage if empty
+  useEffect(() => {
+    if (!localStorage.getItem(SETTINGS_KEY)) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isOn = (id: string) => id === "darkmode" ? theme === "dark" : settings[id as keyof typeof settings];
 

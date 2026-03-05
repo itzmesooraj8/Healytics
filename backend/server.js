@@ -1,6 +1,7 @@
 require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/auth");
 const reportsRoutes = require("./routes/reports");
@@ -8,6 +9,21 @@ const doctorsRoutes = require("./routes/doctors");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// ── Rate Limiting ────────────────────────────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                   // max 10 attempts per IP per window
+  message: { error: "Too many attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,
+  message: { error: "Too many requests. Please slow down." },
+});
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
@@ -38,9 +54,9 @@ app.get("/api/health", (_req, res) => {
 });
 
 // ── Routes ───────────────────────────────────────────────────────────────────
-app.use("/api/auth", authRoutes);
-app.use("/api/reports", reportsRoutes);
-app.use("/api/doctors", doctorsRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/reports", apiLimiter, reportsRoutes);
+app.use("/api/doctors", apiLimiter, doctorsRoutes);
 
 // ── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {

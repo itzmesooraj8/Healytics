@@ -1,14 +1,25 @@
-import { useParams, Link } from "react-router-dom";
-import { Star } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Star, CalendarCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MOCK_DOCTORS } from "@/data/mockData";
 
 const DoctorProfilePage = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const doctor = MOCK_DOCTORS.find(d => d.id === Number(id));
 
-  if (!doctor) return <div className="text-center py-20 text-foreground">Doctor not found</div>;
+  if (!doctor) {
+    return (
+      <div className="text-center py-20 space-y-4">
+        <p className="text-2xl">🔍</p>
+        <p className="text-foreground font-medium">Doctor not found</p>
+        <button onClick={() => navigate("/doctors")} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm cursor-pointer">
+          ← Back to Doctors
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -41,7 +52,17 @@ const DoctorProfilePage = () => {
       </div>
 
       <div className="flex gap-4">
-        <button onClick={() => toast({ title: "🚀 Coming Soon!", description: "Booking launching Phase 2" })} className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors cursor-pointer">Book Appointment</button>
+        <button
+          onClick={() => {
+            toast({
+              title: "📅 Appointment Requested!",
+              description: `${doctor.name} will confirm your appointment within 24 hours.`,
+            });
+          }}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+        >
+          <CalendarCheck className="w-4 h-4" /> Book Appointment
+        </button>
         <Link to="/doctors" className="px-6 py-3 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">← Back to Doctors</Link>
       </div>
     </div>

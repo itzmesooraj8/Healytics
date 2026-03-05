@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { supabase } = require("../lib/supabase");
+const { requireAuth } = require("../middleware/auth");
 
 // ── In-memory store (fallback when Supabase is not configured) ───────────────
 const mockReports = new Map(); // userId → report[]
@@ -89,7 +90,7 @@ const FALLBACK_EXPLANATIONS = {
 // POST /api/reports/analyze
 // Body: { userId, profileName, markers, rawText, healthScore, reportDate }
 // ────────────────────────────────────────────────────────────────────────────
-router.post("/analyze", async (req, res) => {
+router.post("/analyze", requireAuth, async (req, res) => {
   try {
     const {
       userId = "anonymous",
