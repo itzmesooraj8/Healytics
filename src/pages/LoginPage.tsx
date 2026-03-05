@@ -23,9 +23,12 @@ const LoginPage = () => {
     }
     setLoading(true);
     try {
-      const { user, token } = await authAPI.login(email, password);
-      setSession(user, token);
-      window.location.href = user.role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard";
+      const result = await authAPI.login(email, password);
+      setSession(result.user, result.token);
+      if (result.isNewUser) {
+        toast({ title: "✅ Account created!", description: `Welcome, ${result.user.name}! You've been registered automatically.` });
+      }
+      window.location.href = result.user.role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard";
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Login failed";
       toast({ title: "Login failed", description: msg, variant: "destructive" });
@@ -43,8 +46,26 @@ const LoginPage = () => {
       setSession(user, token);
       window.location.href = "/patient-dashboard";
     } catch {
-      // Backend not running — fall back to direct navigation
+      // Fallback: create a session directly without backend
+      setSession({ id: "demo-patient-1", name: "Rajesh Kumar", email: "demo@healytics.ai", role: "patient", created_at: new Date().toISOString() }, "mock-demo-token-patient");
       window.location.href = "/patient-dashboard";
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoDoctorLogin = async () => {
+    setEmail("doctor@healytics.ai");
+    setPassword("demo1234");
+    setLoading(true);
+    try {
+      const { user, token } = await authAPI.login("doctor@healytics.ai", "demo1234");
+      setSession(user, token);
+      window.location.href = "/doctor-dashboard";
+    } catch {
+      // Fallback: create a session directly without backend
+      setSession({ id: "demo-doctor-1", name: "Dr. Sarah Mitchell", email: "doctor@healytics.ai", role: "doctor", created_at: new Date().toISOString() }, "mock-demo-token-doctor");
+      window.location.href = "/doctor-dashboard";
     } finally {
       setLoading(false);
     }
@@ -113,13 +134,27 @@ const LoginPage = () => {
             >
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing In...</> : "Sign In"}
             </button>
-            <button
-              onClick={handleDemoLogin}
-              disabled={loading}
-              className="w-full py-2.5 rounded-lg border border-primary/40 text-primary text-sm hover:bg-primary/10 transition-colors cursor-pointer"
-            >
-              🎯 Quick Demo Login
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={handleDemoLogin}
+                disabled={loading}
+                className="py-2.5 rounded-lg border border-primary/40 text-primary text-sm hover:bg-primary/10 transition-colors cursor-pointer"
+              >
+                🎯 Patient Demo
+              </button>
+              <button
+                onClick={handleDemoDoctorLogin}
+                disabled={loading}
+                className="py-2.5 rounded-lg border border-primary/40 text-primary text-sm hover:bg-primary/10 transition-colors cursor-pointer"
+              >
+                🩺 Doctor Demo
+              </button>
+            </div>
+            <div className="rounded-lg bg-muted/60 border border-border/60 px-4 py-3 text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Demo credentials (no backend needed)</p>
+              <p>Patient — <span className="font-mono text-primary">demo@healytics.ai</span> / <span className="font-mono text-primary">demo1234</span></p>
+              <p>Doctor &nbsp;— <span className="font-mono text-primary">doctor@healytics.ai</span> / <span className="font-mono text-primary">demo1234</span></p>
+            </div>
             <div className="text-center text-muted-foreground text-xs">or continue with</div>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => toast({ title: "🚀 Coming Soon!", description: "OAuth coming in Phase 2" })} className="py-2.5 rounded-lg border border-border text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Google</button>

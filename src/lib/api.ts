@@ -52,6 +52,39 @@ async function apiFetch<T>(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Mock DB — seed default demo accounts once on first load (no backend needed)
+// ─────────────────────────────────────────────────────────────────────────────
+const SEED_KEY = "healytics_mock_seeded_v1";
+if (!localStorage.getItem(SEED_KEY)) {
+  const defaults = [
+    {
+      id: "demo-patient-1",
+      name: "Rajesh Kumar",
+      email: "demo@healytics.ai",
+      password: "demo1234",
+      role: "patient",
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "demo-doctor-1",
+      name: "Dr. Sarah Mitchell",
+      email: "doctor@healytics.ai",
+      password: "demo1234",
+      role: "doctor",
+      created_at: new Date().toISOString(),
+    },
+  ];
+  // Merge with any users already registered so we never overwrite real data
+  const existing: unknown[] = JSON.parse(localStorage.getItem("mock_db_users") || "[]");
+  const merged = [
+    ...defaults.filter((d) => !(existing as { email: string }[]).find((e) => e.email === d.email)),
+    ...existing,
+  ];
+  localStorage.setItem("mock_db_users", JSON.stringify(merged));
+  localStorage.setItem(SEED_KEY, "1");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Auth
 // ─────────────────────────────────────────────────────────────────────────────
 export interface AuthUser {
@@ -65,58 +98,85 @@ export interface AuthUser {
 export interface AuthResponse {
   user: AuthUser;
   token: string;
+  isNewUser?: boolean;
 }
 
 export const authAPI = {
   register: async (name: string, email: string, password: string, role: string): Promise<AuthResponse> => {
     // Mock Registration using LocalStorage (Vercel Backendless Mode)
     const usersStr = localStorage.getItem("mock_db_users") || "[]";
-    const users = JSON.parse(usersStr);
+    const users: any[] = JSON.parse(usersStr);
 
-    if (users.find((u: any) => u.email === email)) {
-      throw new Error("Email already registered");
+    const existing = users.find((u) => u.email === email);
+    if (existing) {
+      // If same password → silently log them in (idempotent register)
+      if (existing.password === password) {
+        const { password: _, ...userWithoutPassword } = existing;
+        return { user: userWithoutPassword as AuthUser, token: `mock-token-${existing.id}` };
+      }
+      throw new Error("This email is already registered. Please sign in instead.");
     }
 
     const newUser = {
       id: `mock-${Date.now()}`,
       name,
       email,
-      password, // Mock storing plaintext for demo purpose
+      password,
       role: role || "patient",
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     users.push(newUser);
     localStorage.setItem("mock_db_users", JSON.stringify(users));
 
     const { password: _, ...userWithoutPassword } = newUser;
-    return { user: userWithoutPassword as AuthUser, token: `mock-token-${newUser.id}` };
+    return { user: userWithoutPassword as AuthUser, token: `mock-token-${newUser.id}`, isNewUser: true };
   },
 
   login: async (email: string, password: string): Promise<AuthResponse> => {
     // Mock Login using LocalStorage (Vercel Backendless Mode)
     const usersStr = localStorage.getItem("mock_db_users") || "[]";
-    const users = JSON.parse(usersStr);
+    const users: any[] = JSON.parse(usersStr);
 
-    const user = users.find((u: any) => u.email === email && u.password === password);
-
-    // Always allow demo account fallback
-    if (!user) {
-      if (email === "demo@healytics.ai" && password === "demo1234") {
-        const demoUser = {
-          id: "demo-user",
-          name: "Rajesh Kumar",
-          email: "demo@healytics.ai",
-          role: "patient",
-          created_at: new Date().toISOString()
-        };
-        return { user: demoUser, token: "mock-demo-token" };
-      }
-      throw new Error("Invalid email or password");
+    // Hardcoded demo accounts (always work even if localStorage is cleared)
+    if (email === "demo@healytics.ai" && password === "demo1234") {
+      return {
+        user: { id: "demo-patient-1", name: "Rajesh Kumar", email: "demo@healytics.ai", role: "patient", created_at: new Date().toISOString() },
+        token: "mock-demo-token-patient",
+      };
+    }
+    if (email === "doctor@healytics.ai" && password === "demo1234") {
+      return {
+        user: { id: "demo-doctor-1", name: "Dr. Sarah Mitchell", email: "doctor@healytics.ai", role: "doctor", created_at: new Date().toISOString() },
+        token: "mock-demo-token-doctor",
+      };
     }
 
-    const { password: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword as AuthUser, token: `mock-token-${user.id}` };
+    const existingByEmail = users.find((u) => u.email === email);
+
+    if (existingByEmail) {
+      // Email exists — check password
+      if (existingByEmail.password !== password) {
+        throw new Error("Incorrect password. Please try again.");
+      }
+      const { password: _, ...userWithoutPassword } = existingByEmail;
+      return { user: userWithoutPassword as AuthUser, token: `mock-token-${existingByEmail.id}` };
+    }
+
+    // ── Frictionless demo mode: unknown email → auto-register as patient ──────
+    const autoName = email.split("@")[0].replace(/[._\-+]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).trim() || "User";
+    const newUser = {
+      id: `mock-${Date.now()}`,
+      name: autoName,
+      email,
+      password,
+      role: "patient",
+      created_at: new Date().toISOString(),
+    };
+    users.push(newUser);
+    localStorage.setItem("mock_db_users", JSON.stringify(users));
+    const { password: _, ...userWithoutPassword } = newUser;
+    return { user: userWithoutPassword as AuthUser, token: `mock-token-${newUser.id}`, isNewUser: true };
   },
 
   forgotPassword: async (email: string) => {

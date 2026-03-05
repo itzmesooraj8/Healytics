@@ -37,8 +37,11 @@ const RegisterPage = () => {
     }
     setLoading(true);
     try {
-      const { user, token } = await authAPI.register(name, email, password, role);
-      setSession(user, token);
+      const result = await authAPI.register(name, email, password, role);
+      setSession(result.user, result.token);
+      if (result.isNewUser !== false) {
+        toast({ title: "🎉 Account created!", description: `Welcome to Healytics, ${result.user.name}!` });
+      }
       window.location.href = role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard";
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Registration failed";
@@ -134,6 +137,10 @@ const RegisterPage = () => {
             >
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating Account...</> : "Create Account"}
             </button>
+            <div className="rounded-lg bg-muted/60 border border-border/60 px-4 py-3 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">No backend needed</p>
+              <p>Accounts are stored locally in your browser. Choose <strong>Patient</strong> or <strong>Doctor</strong> above and register instantly.</p>
+            </div>
             <p className="text-muted-foreground text-xs text-center">By registering you agree to our Terms of Service</p>
             <p className="text-center text-sm text-muted-foreground">Already have an account? <Link to="/login" className="text-primary hover:underline">Sign In →</Link></p>
           </div>
