@@ -1,3 +1,4 @@
+9d290b0 feat: prepare backend for Render deployment
 f2eacfe fix: RegisterPage layout (flex-col pt-14), Enter-key on all inputs, clean nested divs
 a4bd016 fix: add missing useNavigate and useToast imports in LandingPage
 93ec2a8 fix: skin_cancer profileId + fallback, stats projected label, README demo link
