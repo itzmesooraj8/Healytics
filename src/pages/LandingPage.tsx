@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect, lazy, Suspense } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { RadialBarChart, RadialBar, ResponsiveContainer } from "recharts";
 import { FlaskConical, Upload, Brain, CheckCircle, Twitter, Linkedin, Github, Instagram, ArrowRight, Zap, Shield, Globe, ChevronRight, Menu, X } from "lucide-react";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
