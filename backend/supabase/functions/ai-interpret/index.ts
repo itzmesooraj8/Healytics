@@ -1,6 +1,9 @@
+// @ts-nocheck
 // Supabase Edge Function: ai-interpret
 // Deploy: supabase functions deploy ai-interpret
 // Set secret: supabase secrets set GEMINI_API_KEY=your-key-here
+// NOTE: This file runs on Deno (Supabase Edge), NOT Node.js.
+//       The main Healytics backend uses Express + Gemini directly (backend/routes/reports.js).
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -79,7 +82,7 @@ Keep the language simple and empathetic. End with: "Always consult your doctor b
   } catch (error) {
     console.error("Edge function error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -70,23 +70,9 @@ const LabResultsCenter = () => {
   const loadAIExplanation = async (profile: LabProfile) => {
     setIsLoadingAI(true);
     try {
-      // 1. Try Supabase edge function (Gemini live) first
       let explanation: string | null = null;
-      try {
-        const response = await fetch("/functions/v1/ai-interpret", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ profileName: profile.name, markers: profile.markers, rawText: profile.rawText }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          explanation = data.explanation || null;
-        }
-      } catch {
-        // Edge function not available — will use backend or cached
-      }
 
-      // 2. Save to backend API (also triggers Gemini via Express if edge function didn't respond)
+      // Call backend API — triggers Gemini AI + saves to Supabase
       const user = getUser();
       try {
         const result = await reportsAPI.analyze({
@@ -97,8 +83,7 @@ const LabResultsCenter = () => {
           healthScore: profile.healthScore,
           reportDate: profile.date,
         });
-        // If we didn't get an explanation from the edge function, use what the backend returned
-        if (!explanation && result.aiExplanation) explanation = result.aiExplanation;
+        if (result.aiExplanation) explanation = result.aiExplanation;
         if (result.savedToDatabase) {
           toast({ title: "💾 Report saved", description: "Analysis saved to your health record." });
         }
@@ -106,10 +91,10 @@ const LabResultsCenter = () => {
         // Backend not running — use local cached fallback
       }
 
-      // 3. Final fallback to static cached explanation
+      // Fallback to static cached explanation
       setAiExplanation(explanation || AI_EXPLANATIONS[profile.id]);
       if (!explanation) {
-        toast({ title: "📡 AI Ready", description: "Using cached AI response — live API available" });
+        toast({ title: "📡 AI Ready", description: "Using cached AI response — backend not connected." });
       }
     } catch {
       setAiExplanation(AI_EXPLANATIONS[profile.id]);
