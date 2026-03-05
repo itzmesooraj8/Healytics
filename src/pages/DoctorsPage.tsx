@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MOCK_DOCTORS } from "@/data/mockData";
+import { doctorsAPI, type DoctorAPI } from "@/lib/api";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 
 const specialties = ["All", "Endocrinologist", "Cardiologist", "General Physician", "Hematologist", "Diabetologist", "Nephrologist", "Nutritionist", "Internal Medicine"];
@@ -11,10 +12,17 @@ const specialties = ["All", "Endocrinologist", "Cardiologist", "General Physicia
 const DoctorsPage = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [doctors, setDoctors] = useState<DoctorAPI[]>(MOCK_DOCTORS);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const filtered = MOCK_DOCTORS.filter(d =>
+  useEffect(() => {
+    doctorsAPI.getAll()
+      .then(res => setDoctors(res.doctors))
+      .catch(() => setDoctors(MOCK_DOCTORS)); // fallback if backend not running
+  }, []);
+
+  const filtered = doctors.filter(d =>
     (filter === "All" || d.specialty === filter) &&
     d.name.toLowerCase().includes(search.toLowerCase())
   );

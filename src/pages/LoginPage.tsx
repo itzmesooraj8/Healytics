@@ -1,14 +1,55 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 import ThemeToggle from "@/components/ThemeToggle";
+import { authAPI, setSession } from "@/lib/api";
 
 const LoginPage = () => {
   const [showPass, setShowPass] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast({ title: "Missing fields", description: "Please enter your email and password.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { user, token } = await authAPI.login(email, password);
+      setSession(user, token);
+      toast({ title: `Welcome back, ${user.name}! 👋`, description: "Redirecting to your dashboard..." });
+      setTimeout(() => navigate(user.role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"), 800);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed";
+      toast({ title: "Login failed", description: msg, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setEmail("demo@healytics.ai");
+    setPassword("demo1234");
+    setLoading(true);
+    try {
+      const { user, token } = await authAPI.login("demo@healytics.ai", "demo1234");
+      setSession(user, token);
+      toast({ title: "Demo login successful 🎉", description: "Welcome to Healytics!" });
+      setTimeout(() => navigate("/patient-dashboard"), 800);
+    } catch {
+      // Backend not running — fall back to direct navigation
+      toast({ title: "Demo mode", description: "Backend not running — entering demo dashboard." });
+      navigate("/patient-dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="aurora-bg min-h-screen flex items-center justify-center px-4">
@@ -20,16 +61,47 @@ const LoginPage = () => {
           <p className="text-muted-foreground text-sm">Sign in to access your health dashboard</p>
         </div>
         <div className="space-y-4">
-          <input type="email" placeholder="Email address" className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleLogin()}
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+          />
           <div className="relative">
-            <input type={showPass ? "text" : "password"} placeholder="Password" className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary pr-10" />
-            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-3.5 text-muted-foreground cursor-pointer">{showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+            <input
+              type={showPass ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary pr-10"
+            />
+            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-3.5 text-muted-foreground cursor-pointer">
+              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
           <div className="flex justify-between text-xs">
-            <label className="flex items-center gap-2 text-muted-foreground cursor-pointer"><input type="checkbox" className="rounded" /> Remember me</label>
+            <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
+              <input type="checkbox" className="rounded" /> Remember me
+            </label>
             <span className="text-primary cursor-pointer hover:underline">Forgot password?</span>
           </div>
-          <button onClick={() => navigate("/patient-dashboard")} className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors cursor-pointer">Sign In</button>
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing In...</> : "Sign In"}
+          </button>
+          <button
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg border border-primary/40 text-primary text-sm hover:bg-primary/10 transition-colors cursor-pointer"
+          >
+            🎯 Quick Demo Login
+          </button>
           <div className="text-center text-muted-foreground text-xs">or continue with</div>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => toast({ title: "🚀 Coming Soon!", description: "OAuth coming in Phase 2" })} className="py-2.5 rounded-lg border border-border text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Google</button>

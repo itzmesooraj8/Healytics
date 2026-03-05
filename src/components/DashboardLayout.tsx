@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, FlaskConical, FileText, Calendar, Video, Phone,
   Stethoscope, BarChart3, BookOpen, DollarSign, Shield, Settings,
-  User, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Star, Menu
+  User, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Star, Menu, LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MedicalDisclaimer from "./MedicalDisclaimer";
 import ThemeToggle from "./ThemeToggle";
 import NotificationDrawer from "./NotificationDrawer";
+import { getUser, clearSession } from "@/lib/api";
 
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/patient-dashboard" },
@@ -56,6 +57,15 @@ const DashboardLayout = () => {
 
   const effectiveCollapsed = isMobile ? !mobileOpen : collapsed;
   const pageTitle = pageTitles[location.pathname] || "Healytics";
+  const currentUser = getUser();
+  const displayName = currentUser?.name || "Rajesh Kumar";
+  const initials = displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+
+  const handleLogout = () => {
+    clearSession();
+    toast({ title: "Logged out", description: "See you next time! 👋" });
+    navigate("/login");
+  };
 
   const handleNavClick = (item: typeof navItems[0]) => {
     navigate(item.path);
@@ -99,8 +109,15 @@ const DashboardLayout = () => {
 
         <div className="p-3 border-t border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">RK</div>
-            {!effectiveCollapsed && <span className="text-sm text-sidebar-foreground truncate">Rajesh Kumar</span>}
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">{initials}</div>
+            {!effectiveCollapsed && (
+              <div className="flex flex-1 items-center justify-between min-w-0">
+                <span className="text-sm text-sidebar-foreground truncate">{displayName}</span>
+                <button onClick={handleLogout} title="Logout" className="text-muted-foreground hover:text-destructive transition-colors ml-1">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -128,10 +145,13 @@ const DashboardLayout = () => {
               <Bell className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
               <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full" style={{ backgroundColor: "hsl(var(--accent-amber))" }} />
             </button>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">RK</div>
-              <span className="text-sm text-foreground hidden md:block">Rajesh Kumar</span>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">{initials}</div>
+              <span className="text-sm text-foreground hidden md:block">{displayName}</span>
               <ChevronDown className="w-4 h-4 text-muted-foreground hidden md:block" />
+              <button onClick={handleLogout} title="Logout" className="text-muted-foreground hover:text-destructive transition-colors hidden md:block">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>

@@ -6,6 +6,7 @@ import { Calendar, FlaskConical, Heart, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HEALTH_TREND_DATA } from "@/data/mockData";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { getUser, reportsAPI, type ReportSummary } from "@/lib/api";
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
@@ -35,8 +36,30 @@ const PatientDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [apiReports, setApiReports] = useState<ReportSummary[]>([]);
 
-  useEffect(() => { const t = setTimeout(() => setLoading(false), 1500); return () => clearTimeout(t); }, []);
+  const currentUser = getUser();
+  const firstName = currentUser?.name?.split(" ")[0] || "Rajesh";
+
+  useEffect(() => {
+    const init = async () => {
+      // Load UI
+      await new Promise(r => setTimeout(r, 1200));
+      setLoading(false);
+
+      // Try to fetch reports from API
+      if (currentUser?.id) {
+        try {
+          const { reports } = await reportsAPI.getByUser(currentUser.id);
+          if (reports.length) setApiReports(reports);
+        } catch {
+          // Backend not running — use static mock data
+        }
+      }
+    };
+    init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (
@@ -53,8 +76,8 @@ const PatientDashboard = () => {
   return (
     <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="show" className="space-y-6">
       <motion.div variants={fadeUp}>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Good morning, Rajesh 👋</h1>
-        <p className="text-muted-foreground text-sm">March 4, 2026</p>
+        <h1 className="font-heading text-2xl font-bold text-foreground">Good morning, {firstName} 👋</h1>
+        <p className="text-muted-foreground text-sm">{new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
       </motion.div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -137,15 +160,33 @@ const PatientDashboard = () => {
         <motion.div variants={fadeUp} className="glass-card p-6">
           <h3 className="font-heading font-bold text-foreground mb-3">Recent Lab Reports</h3>
           <div className="space-y-3">
-            {reports.map(r => (
-              <div key={r.name} className="flex items-center justify-between">
-                <div><p className="text-foreground text-sm">{r.name}</p><p className="text-muted-foreground text-xs">{r.date}</p></div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${r.color === "destructive" ? "bg-destructive/20 text-destructive" : r.color === "accent-green" ? "bg-[hsl(var(--accent-green))]/20 text-[hsl(var(--accent-green))]" : "bg-[hsl(var(--accent-amber))]/20 text-[hsl(var(--accent-amber))]"}`}>{r.badge}</span>
-                  <Link to="/lab-results" className="text-primary text-xs hover:underline">View</Link>
+            {/* Show API reports if available, otherwise fall back to static mock */}
+            {apiReports.length > 0 ? (
+              apiReports.slice(0, 5).map(r => (
+                <div key={r.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="text-foreground text-sm">{r.profile_name}</p>
+                    <p className="text-muted-foreground text-xs">{r.report_date}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${r.health_score >= 75 ? "bg-[hsl(var(--accent-green))]/20 text-[hsl(var(--accent-green))]" : r.health_score >= 50 ? "bg-[hsl(var(--accent-amber))]/20 text-[hsl(var(--accent-amber))]" : "bg-destructive/20 text-destructive"}`}>
+                      Score: {r.health_score}
+                    </span>
+                    <Link to="/lab-results" className="text-primary text-xs hover:underline">View</Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              reports.map(r => (
+                <div key={r.name} className="flex items-center justify-between">
+                  <div><p className="text-foreground text-sm">{r.name}</p><p className="text-muted-foreground text-xs">{r.date}</p></div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${r.color === "destructive" ? "bg-destructive/20 text-destructive" : r.color === "accent-green" ? "bg-[hsl(var(--accent-green))]/20 text-[hsl(var(--accent-green))]" : "bg-[hsl(var(--accent-amber))]/20 text-[hsl(var(--accent-amber))]"}`}>{r.badge}</span>
+                    <Link to="/lab-results" className="text-primary text-xs hover:underline">View</Link>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 

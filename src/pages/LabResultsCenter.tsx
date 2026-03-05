@@ -10,6 +10,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import TypewriterText from "@/components/TypewriterText";
 import AIChatBubble from "@/components/AIChatBubble";
 import PrintSummaryCard from "@/components/PrintSummaryCard";
+import { reportsAPI, getUser } from "@/lib/api";
 import {
   DIABETIC_PROFILE, CARDIAC_PROFILE, VITAMIN_PROFILE,
   AI_EXPLANATIONS, ACTIONABLE_INSIGHTS, WEARABLE_DATA,
@@ -69,17 +70,49 @@ const LabResultsCenter = () => {
   const loadAIExplanation = async (profile: LabProfile) => {
     setIsLoadingAI(true);
     try {
-      const response = await fetch("/functions/v1/ai-interpret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileName: profile.name, markers: profile.markers, rawText: profile.rawText }),
-      });
-      if (!response.ok) throw new Error("API error");
-      const data = await response.json();
-      setAiExplanation(data.explanation || AI_EXPLANATIONS[profile.id]);
+      // 1. Try Supabase edge function (Gemini live) first
+      let explanation: string | null = null;
+      try {
+        const response = await fetch("/functions/v1/ai-interpret", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profileName: profile.name, markers: profile.markers, rawText: profile.rawText }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          explanation = data.explanation || null;
+        }
+      } catch {
+        // Edge function not available — will use backend or cached
+      }
+
+      // 2. Save to backend API (also triggers Gemini via Express if edge function didn't respond)
+      const user = getUser();
+      try {
+        const result = await reportsAPI.analyze({
+          userId: user?.id,
+          profileName: profile.name,
+          markers: profile.markers,
+          rawText: profile.rawText,
+          healthScore: profile.healthScore,
+          reportDate: profile.date,
+        });
+        // If we didn't get an explanation from the edge function, use what the backend returned
+        if (!explanation && result.aiExplanation) explanation = result.aiExplanation;
+        if (result.savedToDatabase) {
+          toast({ title: "💾 Report saved", description: "Analysis saved to your health record." });
+        }
+      } catch {
+        // Backend not running — use local cached fallback
+      }
+
+      // 3. Final fallback to static cached explanation
+      setAiExplanation(explanation || AI_EXPLANATIONS[profile.id]);
+      if (!explanation) {
+        toast({ title: "📡 AI Ready", description: "Using cached AI response — live API available" });
+      }
     } catch {
       setAiExplanation(AI_EXPLANATIONS[profile.id]);
-      toast({ title: "📡 AI Ready", description: "Using cached AI response — live API available" });
     } finally {
       setIsLoadingAI(false);
     }
