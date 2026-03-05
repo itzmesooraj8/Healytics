@@ -1,6 +1,6 @@
 // setup-db.js — Run this ONCE to create all Healytics tables in Supabase
-// Usage: node setup-db.js
-require("dotenv").config();
+// Usage: node backend/setup-db.js  (from repo root)  OR  node setup-db.js  (from backend/)
+require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
