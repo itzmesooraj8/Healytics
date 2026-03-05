@@ -68,23 +68,61 @@ export interface AuthResponse {
 }
 
 export const authAPI = {
-  register: (name: string, email: string, password: string, role: string) =>
-    apiFetch<AuthResponse>("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password, role }),
-    }),
+  register: async (name: string, email: string, password: string, role: string): Promise<AuthResponse> => {
+    // Mock Registration using LocalStorage (Vercel Backendless Mode)
+    const usersStr = localStorage.getItem("mock_db_users") || "[]";
+    const users = JSON.parse(usersStr);
 
-  login: (email: string, password: string) =>
-    apiFetch<AuthResponse>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    }),
+    if (users.find((u: any) => u.email === email)) {
+      throw new Error("Email already registered");
+    }
 
-  forgotPassword: (email: string) =>
-    apiFetch<{ message: string }>("/auth/forgot-password", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
+    const newUser = {
+      id: `mock-${Date.now()}`,
+      name,
+      email,
+      password, // Mock storing plaintext for demo purpose
+      role: role || "patient",
+      created_at: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    localStorage.setItem("mock_db_users", JSON.stringify(users));
+
+    const { password: _, ...userWithoutPassword } = newUser;
+    return { user: userWithoutPassword as AuthUser, token: `mock-token-${newUser.id}` };
+  },
+
+  login: async (email: string, password: string): Promise<AuthResponse> => {
+    // Mock Login using LocalStorage (Vercel Backendless Mode)
+    const usersStr = localStorage.getItem("mock_db_users") || "[]";
+    const users = JSON.parse(usersStr);
+
+    const user = users.find((u: any) => u.email === email && u.password === password);
+
+    // Always allow demo account fallback
+    if (!user) {
+      if (email === "demo@healytics.ai" && password === "demo1234") {
+        const demoUser = {
+          id: "demo-user",
+          name: "Rajesh Kumar",
+          email: "demo@healytics.ai",
+          role: "patient",
+          created_at: new Date().toISOString()
+        };
+        return { user: demoUser, token: "mock-demo-token" };
+      }
+      throw new Error("Invalid email or password");
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+    return { user: userWithoutPassword as AuthUser, token: `mock-token-${user.id}` };
+  },
+
+  forgotPassword: async (email: string) => {
+    // Mock forgot password
+    return { message: "If that email exists, a reset link has been sent." };
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
