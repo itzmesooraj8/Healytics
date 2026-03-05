@@ -4,11 +4,11 @@
 // Base URL is /api (proxied to http://localhost:3001 by Vite in dev mode)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BASE = "/api";
+const BASE = import.meta.env.VITE_API_URL || "/api";
 
 // ── Storage helpers ───────────────────────────────────────────────────────────
 export const getToken = (): string | null => localStorage.getItem("healytics_token");
-export const getUser  = () => {
+export const getUser = () => {
   try { return JSON.parse(localStorage.getItem("healytics_user") || "null"); }
   catch { return null; }
 };
