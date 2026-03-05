@@ -72,21 +72,38 @@ Expected output: `🎉 DATABASE FULLY OPERATIONAL — ALL 5 REAL-TIME FEATURES R
 
 ### 4. Run Both Servers
 
-**Option A — PowerShell (Windows):**
+> **Note:** All commands below can be run from `health-insights-hub-main/` **or** from the parent `healthinsightshub/` folder — both work.
+
+**Option A — One-click (Windows PowerShell):**
 
 ```powershell
+# From the healthinsightshub/ parent folder:
+.\start.ps1
+
+# Or from health-insights-hub-main/:
 .\start.ps1
 ```
 
-**Option B — Manual:**
+**Option B — npm (from either folder):**
+
+```sh
+# From healthinsightshub/ parent folder:
+npm run dev       # frontend only
+npm run backend   # backend only
+npm run start     # both together
+
+# From health-insights-hub-main/:
+npm run dev
+```
+
+**Option C — Manual (two terminals):**
 
 ```sh
 # Terminal 1 — Backend
-cd backend
-node server.js
+node health-insights-hub-main/backend/server.js
 
 # Terminal 2 — Frontend
-npm run dev
+npm run dev --prefix health-insights-hub-main
 ```
 
 Open [http://localhost:8080](http://localhost:8080)
