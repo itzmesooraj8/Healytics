@@ -1,0 +1,10 @@
+f2eacfe fix: RegisterPage layout (flex-col pt-14), Enter-key on all inputs, clean nested divs
+a4bd016 fix: add missing useNavigate and useToast imports in LandingPage
+93ec2a8 fix: skin_cancer profileId + fallback, stats projected label, README demo link
+54c8dda feat: footer links fully functional (navigate + toasts), time-of-day greeting (morning/afternoon/evening)
+2d19062 feat: graceful shutdown, 401 auto-redirect, print auto-close, wearable variation, voice fallback toast, settings descriptive toasts, Join video call, forgot password endpoint, doctor pagination, userId FK null-safety, robots.txt, sitemap.xml, meta keywords
+930dc71 feat: favicon, OG meta, page titles (all pages), print CSS, Watch Demo scroll, explainability animation, reports skeleton loader
+8092a5d fix: all critical & polish gaps ??? auth guard, rate limit, JWT middleware, settings persist, doctor UX, gauge fix, demo seed, email validation
+d8062b4 docs: comprehensive judge-ready README with architecture, API reference, verification steps, full tech stack
+a37948d fix: resolve all TS errors and dead code issues
+d6cd99e fix: setup-db dotenv __dirname path; clean judge-ready README

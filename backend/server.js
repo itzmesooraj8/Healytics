@@ -27,12 +27,8 @@ const apiLimiter = rateLimit({
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || "http://localhost:8080",
-    "http://localhost:8080",
-    "http://localhost:3000",
-  ],
-  credentials: true,
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
 }));
 app.use(express.json({ limit: "10mb" }));
 
@@ -69,10 +65,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Internal server error", message: err.message });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Healytics API running on http://localhost:${PORT}`);
-  console.log(`📋 Health check: http://localhost:${PORT}/api/health\n`);
-});
+const server = app.listen(PORT, () => console.log(`Healytics backend running on port ${PORT}`));
 
 // ── Graceful shutdown ────────────────────────────────────────────────────────
 const shutdown = (signal) => {
@@ -85,4 +78,4 @@ const shutdown = (signal) => {
   setTimeout(() => { console.error("⚠️  Forced exit"); process.exit(1); }, 5000);
 };
 process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT",  () => shutdown("SIGINT"));
+process.on("SIGINT", () => shutdown("SIGINT"));
