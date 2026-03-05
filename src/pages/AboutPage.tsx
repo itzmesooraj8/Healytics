@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Target, Award, Heart, Globe, Zap } from "lucide-react";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 import PublicNavbar from "@/components/PublicNavbar";
 
-const AboutPage = () => (
+const AboutPage = () => {
+  useEffect(() => { document.title = "About Us — Healytics"; }, []);
+  return (
   <div className="min-h-screen bg-background">
     <PublicNavbar />
 
@@ -71,6 +74,7 @@ const AboutPage = () => (
     </div>
     <MedicalDisclaimer />
   </div>
-);
+  );
+};
 
 export default AboutPage;

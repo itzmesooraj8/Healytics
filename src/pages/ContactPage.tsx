@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 const ContactPage = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  useEffect(() => { document.title = "Contact Us — Healytics"; }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

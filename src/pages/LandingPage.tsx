@@ -56,6 +56,8 @@ const LandingPage = () => {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  useEffect(() => { document.title = "Healytics — AI-Powered Health Intelligence Platform"; }, []);
   const [statsInView, setStatsInView] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -203,8 +205,11 @@ const LandingPage = () => {
                 🔬 Analyze Lab Report
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <button className="px-7 py-3.5 rounded-xl border border-border/60 text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all font-medium text-sm backdrop-blur-sm">
-                Watch Demo
+              <button
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-7 py-3.5 rounded-xl border border-border/60 text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all font-medium text-sm backdrop-blur-sm"
+              >
+                ▶ Watch Demo
               </button>
             </motion.div>
 
@@ -267,7 +272,7 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Features with 3D background */}
-      <section className="py-20 px-6 md:px-12 max-w-7xl mx-auto relative">
+      <section id="features" className="py-20 px-6 md:px-12 max-w-7xl mx-auto relative">
         <Suspense fallback={null}>
           <FeatureScene />
         </Suspense>

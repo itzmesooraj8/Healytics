@@ -18,6 +18,7 @@ const DoctorsPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "Find Doctors — Healytics";
     doctorsAPI.getAll()
       .then(res => setDoctors(res.doctors))
       .catch(() => setDoctors(MOCK_DOCTORS)); // fallback if backend not running

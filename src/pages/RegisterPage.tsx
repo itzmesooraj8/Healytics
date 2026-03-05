@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,8 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => { document.title = "Create Account — Healytics"; }, []);
 
   const strength = password.length < 6 ? "weak" : password.length < 10 ? "medium" : "strong";
   const strengthColor = strength === "weak" ? "hsl(var(--destructive))" : strength === "medium" ? "hsl(var(--accent-amber))" : "hsl(var(--accent-green))";

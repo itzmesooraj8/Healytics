@@ -37,6 +37,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [apiReports, setApiReports] = useState<ReportSummary[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
 
   const currentUser = getUser();
   const firstName = currentUser?.name?.split(" ")[0] || "Rajesh";
@@ -49,11 +50,14 @@ const PatientDashboard = () => {
 
       // Try to fetch reports from API
       if (currentUser?.id) {
+        setReportsLoading(true);
         try {
           const { reports } = await reportsAPI.getByUser(currentUser.id);
           if (reports.length) setApiReports(reports);
         } catch {
           // Backend not running — use static mock data
+        } finally {
+          setReportsLoading(false);
         }
       }
     };
@@ -160,8 +164,14 @@ const PatientDashboard = () => {
         <motion.div variants={fadeUp} className="glass-card p-6">
           <h3 className="font-heading font-bold text-foreground mb-3">Recent Lab Reports</h3>
           <div className="space-y-3">
-            {/* Show API reports if available, otherwise fall back to static mock */}
-            {apiReports.length > 0 ? (
+            {reportsLoading ? (
+              [1,2,3].map(i => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="space-y-1"><div className="h-3 w-32 bg-muted animate-pulse rounded" /><div className="h-2 w-20 bg-muted animate-pulse rounded" /></div>
+                  <div className="h-5 w-16 bg-muted animate-pulse rounded-full" />
+                </div>
+              ))
+            ) : apiReports.length > 0 ? (
               apiReports.slice(0, 5).map(r => (
                 <div key={r.id} className="flex items-center justify-between">
                   <div>

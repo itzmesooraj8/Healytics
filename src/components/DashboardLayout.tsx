@@ -59,6 +59,12 @@ const DashboardLayout = () => {
   const pageTitle = pageTitles[location.pathname] || "Healytics";
   const currentUser = getUser();
 
+  // ── Dynamic page title ──────────────────────────────────────────────────
+  useEffect(() => {
+    const title = pageTitles[location.pathname];
+    document.title = title ? `${title} — Healytics` : 'Healytics';
+  }, [location.pathname]);
+
   // ── Protected Route Guard ──────────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem("healytics_token");

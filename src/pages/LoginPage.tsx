@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => { document.title = "Sign In — Healytics"; }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {

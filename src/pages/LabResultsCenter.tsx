@@ -429,7 +429,7 @@ const LabResultsCenter = () => {
             <SheetTitle className="font-heading text-foreground">How We Interpreted This Result</SheetTitle>
           </SheetHeader>
           {selectedMarker && (
-            <div className="space-y-6 mt-6">
+            <div className="space-y-6 mt-6 animate-in fade-in-0 slide-in-from-right-4 duration-300">
               <div>
                 <p className="text-muted-foreground text-xs mb-1">Your Value</p>
                 <p className="text-3xl font-heading font-bold text-foreground">{selectedMarker.value} <span className="text-lg text-muted-foreground">{selectedMarker.unit}</span></p>

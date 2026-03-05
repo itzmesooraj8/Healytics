@@ -241,7 +241,18 @@
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.8); }
 * { scrollbar-width: thin; scrollbar-color: hsl(var(--primary)) hsl(var(--muted)); }
 
-/* Print styles */
+/* Print styles — isolates PrintSummaryCard and hides everything else */
 @media print {
-  .no-print, nav, aside, header, footer { display: none !important; }
+  body * { visibility: hidden !important; }
+  .print-summary, .print-summary * { visibility: visible !important; }
+  .print-summary {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 100% !important; height: auto !important;
+    background: white !important;
+    color: black !important;
+    z-index: 99999 !important;
+    padding: 24px !important;
+  }
+  .no-print { display: none !important; }
 }

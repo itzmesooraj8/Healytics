@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { FlaskConical, Mic, FileDown, Activity, Brain, Stethoscope, Shield, Globe, Smartphone } from "lucide-react";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
@@ -15,7 +16,9 @@ const services = [
   { icon: Globe, title: "Rural Health Access", desc: "Designed to work on basic internet connections. Aligned with UN SDG 3 to bring healthcare intelligence to underserved communities.", color: "primary" },
 ];
 
-const ServicesPage = () => (
+const ServicesPage = () => {
+  useEffect(() => { document.title = "Services — Healytics"; }, []);
+  return (
   <div className="min-h-screen bg-background">
     <PublicNavbar />
 
@@ -44,6 +47,7 @@ const ServicesPage = () => (
     </div>
     <MedicalDisclaimer />
   </div>
-);
+  );
+};
 
 export default ServicesPage;
