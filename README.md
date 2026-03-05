@@ -1,53 +1,164 @@
-# Welcome to your Lovable project
+# Healytics — AI-Powered Health Intelligence Platform
 
-## Project info
+> Full-stack health insights hub with real-time lab analysis, AI-driven explanations (Gemini 1.5 Flash), telehealth, and a patient/doctor dual-dashboard.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 + TypeScript + Vite (port 8080) |
+| Styling | Tailwind CSS + Shadcn UI + Framer Motion |
+| Charts | Recharts |
+| PDF Export | jsPDF |
+| Backend | Node.js + Express (port 3001) |
+| Database | Supabase (PostgreSQL) |
+| Auth | JWT + bcrypt |
+| AI | Google Gemini 1.5 Flash |
+| 3D / Visuals | Three.js via React Three Fiber |
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Node.js 18+
+- npm or bun
+- Supabase project (free tier works)
+- Google AI Studio API key (for Gemini)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### 1. Clone & Install
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone https://github.com/itzmesooraj8/Healytics.git
+cd Healytics
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install frontend dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install backend dependencies
+cd backend
+npm install
+cd ..
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 2. Configure Environment
+
+Copy the example env file and fill in your keys:
+
+```sh
+copy backend\.env.example backend\.env
+```
+
+Edit `backend/.env`:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+JWT_SECRET=your-random-jwt-secret
+GEMINI_API_KEY=your-gemini-api-key
+PORT=3001
+FRONTEND_URL=http://localhost:8080
+```
+
+### 3. Set Up Database
+
+Run the schema in your Supabase SQL Editor (`backend/supabase/schema.sql`), then verify:
+
+```sh
+cd backend
+node setup-db.js
+```
+
+Expected output: `🎉 DATABASE FULLY OPERATIONAL — ALL 5 REAL-TIME FEATURES READY`
+
+### 4. Run Both Servers
+
+**Option A — PowerShell (Windows):**
+
+```powershell
+.\start.ps1
+```
+
+**Option B — Manual:**
+
+```sh
+# Terminal 1 — Backend
+cd backend
+node server.js
+
+# Terminal 2 — Frontend
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open [http://localhost:8080](http://localhost:8080)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## API Endpoints
 
-**Use GitHub Codespaces**
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/health` | Health check |
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login, returns JWT |
+| POST | `/api/reports/analyze` | Analyze lab results with Gemini AI |
+| GET | `/api/reports/:userId` | Get all reports for a user |
+| GET | `/api/reports/:reportId/markers` | Get markers for a report |
+| GET | `/api/doctors` | List all doctors |
+| GET | `/api/doctors/:id` | Get doctor by ID |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
+## Database Schema
+
+4 tables in Supabase PostgreSQL:
+
+- **`users`** — name, email (unique), hashed password, role (patient/doctor/admin)
+- **`lab_reports`** — analysis type, risk level, AI explanation, linked to user
+- **`lab_markers`** — individual biomarker values per report
+- **`appointments`** — patient/doctor/date/status
+
+## Key Features
+
+1. **AI Lab Analysis** — Upload lab values → Gemini AI returns personalized health explanation
+2. **Real-time Dashboard** — Patient dashboard shows actual DB reports with live risk scores
+3. **Secure Auth** — JWT-based login/register with bcrypt password hashing
+4. **Doctor Directory** — Browse doctor profiles fetched from backend
+5. **PDF Export** — Download lab report summaries as PDF
+6. **Telehealth** — Video consultation page
+7. **Dark / Light Mode** — Theme toggle persisted to localStorage
+
+## Demo Account
+
+After running the backend, you can log in with:
+
+| Email | Password | Role |
+|---|---|---|
+| `demo@healytics.ai` | `demo1234` | Patient |
+
+## Project Structure
+
+```
+health-insights-hub-main/
+├── src/
+│   ├── components/       # Reusable UI + 3D components
+│   ├── pages/            # Route-level page components
+│   ├── lib/api.ts        # Centralized frontend API client
+│   └── data/mockData.ts  # Fallback mock data
+├── backend/
+│   ├── server.js         # Express entry point
+│   ├── routes/           # auth, reports, doctors
+│   ├── lib/supabase.js   # Supabase client
+│   ├── supabase/
+│   │   ├── schema.sql    # Database schema
+│   │   └── functions/    # Edge function (Gemini proxy)
+│   ├── setup-db.js       # DB verification script
+│   └── .env.example      # Environment template
+├── start.ps1             # One-click launcher (Windows)
+└── README.md
+```
+
+## Security Notes
+
+- `backend/.env` is gitignored — never committed
+- Service role key only used server-side, never exposed to frontend
+- All API routes validate JWT before accessing user data
+- Passwords hashed with bcrypt (10 rounds)
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
