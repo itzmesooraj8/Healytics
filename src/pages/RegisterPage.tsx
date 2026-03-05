@@ -50,7 +50,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="aurora-bg min-h-screen flex items-center justify-center px-4">
+    <div className="aurora-bg min-h-screen flex flex-col pt-14">
       {/* Top navigation bar */}
       <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 md:px-8 bg-background/70 backdrop-blur-xl border-b border-border/40">
         <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -62,7 +62,9 @@ const RegisterPage = () => {
           <ThemeToggle />
           <Link to="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">Sign in →</Link>
         </div>
-      </div>      <div className="flex-1 flex items-center justify-center px-4 py-8">      <div className="relative z-10 glass-card p-8 w-full max-w-md">
+      </div>
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="relative z-10 glass-card p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-primary text-2xl">⚕</span>
           <h2 className="font-heading text-2xl font-bold text-foreground mt-2">Create Your Account</h2>
@@ -73,6 +75,7 @@ const RegisterPage = () => {
             placeholder="Full Name"
             value={name}
             onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleRegister()}
             className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <input
@@ -80,6 +83,7 @@ const RegisterPage = () => {
             placeholder="Email address"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleRegister()}
             className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <div>
@@ -89,6 +93,7 @@ const RegisterPage = () => {
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleRegister()}
                 className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary pr-10"
               />
               <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-3.5 text-muted-foreground cursor-pointer">
@@ -109,6 +114,7 @@ const RegisterPage = () => {
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleRegister()}
             className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <div className="flex gap-3">
