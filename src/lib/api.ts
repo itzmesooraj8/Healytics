@@ -40,6 +40,11 @@ async function apiFetch<T>(
   try { body = await res.json(); } catch { body = {}; }
 
   if (!res.ok) {
+    // Auto-redirect to login on 401 Unauthorized (expired / invalid token)
+    if (res.status === 401) {
+      clearSession();
+      window.location.href = "/login";
+    }
     const msg = (body as { error?: string })?.error || `HTTP ${res.status}`;
     throw new Error(msg);
   }
@@ -73,6 +78,12 @@ export const authAPI = {
     apiFetch<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+    }),
+
+  forgotPassword: (email: string) =>
+    apiFetch<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
     }),
 };
 

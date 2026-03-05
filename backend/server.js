@@ -69,7 +69,20 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Internal server error", message: err.message });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`\n🚀 Healytics API running on http://localhost:${PORT}`);
   console.log(`📋 Health check: http://localhost:${PORT}/api/health\n`);
 });
+
+// ── Graceful shutdown ────────────────────────────────────────────────────────
+const shutdown = (signal) => {
+  console.log(`\n⏹  ${signal} received — closing server gracefully...`);
+  server.close(() => {
+    console.log("✅ Server closed. Goodbye!");
+    process.exit(0);
+  });
+  // Force-kill if not closed in 5 s
+  setTimeout(() => { console.error("⚠️  Forced exit"); process.exit(1); }, 5000);
+};
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT",  () => shutdown("SIGINT"));

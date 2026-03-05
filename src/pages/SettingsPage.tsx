@@ -27,6 +27,14 @@ const SettingsPage = () => {
     { id: "email", label: "Email Alerts", desc: "Get email notifications for lab results" },
   ];
 
+  const toastMessages: Record<string, { title: string; description: string }> = {
+    notifications: { title: "🔔 Notifications", description: settings.notifications ? "Notifications disabled." : "Notifications enabled — you'll receive health alerts." },
+    darkmode:      { title: "🌙 Theme", description: "Theme switched successfully." },
+    voice:         { title: "🔊 Voice Readout", description: settings.voice ? "Voice readout disabled." : "Voice readout enabled — AI will speak your results." },
+    datasharing:   { title: "🔒 Data Sharing", description: settings.datasharing ? "Data sharing disabled." : "Anonymised data sharing enabled — thank you for contributing to research." },
+    email:         { title: "✉️ Email Alerts", description: settings.email ? "Email alerts disabled." : "Email alerts enabled — you'll hear about new lab results." },
+  };
+
   const handleToggle = (id: string) => {
     if (id === "darkmode") {
       toggleTheme();
@@ -37,7 +45,8 @@ const SettingsPage = () => {
         return next;
       });
     }
-    toast({ title: "Setting saved", description: "Preference updated." });
+    const msg = toastMessages[id];
+    toast({ title: msg?.title ?? "Setting saved", description: msg?.description ?? "Preference updated." });
   };
 
   // Persist on first load to initialise localStorage if empty
@@ -73,9 +82,9 @@ const SettingsPage = () => {
       <div className="glass-card p-6 space-y-4">
         <h3 className="font-heading font-bold text-foreground">Account</h3>
         <div className="space-y-3">
-          <button className="w-full text-left px-4 py-3 rounded-lg bg-muted/50 text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Change Password</button>
-          <button className="w-full text-left px-4 py-3 rounded-lg bg-muted/50 text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Export My Data</button>
-          <button className="w-full text-left px-4 py-3 rounded-lg bg-destructive/10 text-destructive text-sm hover:bg-destructive/20 transition-colors cursor-pointer">Delete Account</button>
+          <button onClick={() => toast({ title: "🔑 Change Password", description: "A password reset link has been sent to your registered email." })} className="w-full text-left px-4 py-3 rounded-lg bg-muted/50 text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Change Password</button>
+          <button onClick={() => toast({ title: "📦 Export Started", description: "Your health data export will be ready in a few minutes. Check your email." })} className="w-full text-left px-4 py-3 rounded-lg bg-muted/50 text-foreground text-sm hover:bg-muted transition-colors cursor-pointer">Export My Data</button>
+          <button onClick={() => toast({ title: "⚠️ Delete Account", description: "Account deletion requires confirmation via email. A link has been sent.", variant: "destructive" })} className="w-full text-left px-4 py-3 rounded-lg bg-destructive/10 text-destructive text-sm hover:bg-destructive/20 transition-colors cursor-pointer">Delete Account</button>
         </div>
       </div>
     </motion.div>

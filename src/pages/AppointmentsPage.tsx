@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Calendar, Clock, Video, MapPin, Plus, ChevronRight } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const appointments = [
@@ -12,8 +14,11 @@ const appointments = [
 
 const AppointmentsPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const upcoming = appointments.filter(a => a.status === "upcoming");
   const past = appointments.filter(a => a.status === "completed");
+
+  useEffect(() => { document.title = "Appointments — Healytics"; }, []);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -57,7 +62,7 @@ const AppointmentsPage = () => {
                 <span className="flex items-center gap-1">{a.type === "Video Call" ? <Video className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}{a.type}</span>
               </div>
               <div className="flex gap-2">
-                {a.type === "Video Call" && <button className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs cursor-pointer hover:bg-primary/90">Join</button>}
+                {a.type === "Video Call" && <button onClick={() => navigate("/video-call")} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs cursor-pointer hover:bg-primary/90">Join</button>}
                 <button onClick={() => toast({ title: "Appointment rescheduled", description: "Your appointment has been updated." })} className="px-3 py-1.5 rounded-lg border border-border text-muted-foreground text-xs cursor-pointer hover:text-foreground">Reschedule</button>
               </div>
             </div>

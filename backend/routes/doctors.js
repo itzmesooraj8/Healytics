@@ -15,8 +15,11 @@ const DOCTORS = [
   { id: 8, name: "Dr. Vikram Patel", specialty: "Internal Medicine", rating: 4.7, reviews: 445, available: true, experience: "20 years", hospital: "Narayana Health, Bangalore", avatar: "VP", color: "#00ff88" },
 ];
 
-router.get("/", (_req, res) => {
-  res.json({ doctors: DOCTORS, total: DOCTORS.length });
+router.get("/", (req, res) => {
+  const limit  = parseInt(req.query.limit)  || DOCTORS.length;
+  const offset = parseInt(req.query.offset) || 0;
+  const page   = DOCTORS.slice(offset, offset + limit);
+  res.json({ doctors: page, total: DOCTORS.length, limit, offset });
 });
 
 router.get("/:id", (req, res) => {

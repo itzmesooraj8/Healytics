@@ -43,6 +43,7 @@ const LabResultsCenter = () => {
   const [selectedMarker, setSelectedMarker] = useState<LabMarker | null>(null);
   const [wearableSynced, setWearableSynced] = useState(false);
   const [syncingWearable, setSyncingWearable] = useState(false);
+  const [wearableValues, setWearableValues] = useState(WEARABLE_DATA);
   const [showCompare, setShowCompare] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
@@ -130,7 +131,13 @@ const LabResultsCenter = () => {
     const partialMatch = voices.find(v => v.lang.startsWith(selectedLanguage.split("-")[0]));
     if (exactMatch) utterance.voice = exactMatch;
     else if (partialMatch) utterance.voice = partialMatch;
-    // If no native voice found, the browser will still attempt TTS with the lang hint
+    else if (selectedLanguage !== "en-US") {
+      // No native voice found — warn user and fall back to English
+      toast({ title: "🔊 No native voice found", description: `Your OS doesn't have a ${selectedLanguage} voice. Playing in English. Install the language pack in System Settings for native voice.`, variant: "destructive" });
+      utterance.lang = "en-US";
+      const enVoice = voices.find(v => v.lang.startsWith("en"));
+      if (enVoice) utterance.voice = enVoice;
+    }
 
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
@@ -164,7 +171,24 @@ const LabResultsCenter = () => {
   };
 
   const handleFileUpload = () => runAnalysis(activeProfile);
-  const syncWearable = () => { setSyncingWearable(true); setTimeout(() => { setWearableSynced(true); setSyncingWearable(false); }, 2000); };
+  const syncWearable = () => {
+    setSyncingWearable(true);
+    setTimeout(() => {
+      // Add ±5% realistic variation so each sync shows slightly different live data
+      const vary = (base: number, pct: number) =>
+        Math.round(base * (1 + (Math.random() - 0.5) * 2 * (pct / 100)));
+      setWearableValues({
+        heartRate: vary(WEARABLE_DATA.heartRate, 5),
+        spo2: Math.min(100, vary(WEARABLE_DATA.spo2, 1)),
+        steps: vary(WEARABLE_DATA.steps, 10),
+        sleep: parseFloat((WEARABLE_DATA.sleep + (Math.random() - 0.5) * 0.6).toFixed(1)),
+        hrv: vary(WEARABLE_DATA.hrv, 8),
+      });
+      setWearableSynced(true);
+      setSyncingWearable(false);
+      toast({ title: "⌚ Wearable Synced", description: "Live data from Apple Health — just now." });
+    }, 2000);
+  };
 
   const scoreColor = activeProfile.healthScore > 75 ? "hsl(var(--accent-green))" : activeProfile.healthScore >= 50 ? "hsl(var(--accent-amber))" : "hsl(var(--destructive))";
   const scoreLabel = activeProfile.healthScore > 75 ? "HEALTHY" : activeProfile.healthScore >= 50 ? "BORDERLINE" : "CRITICAL ATTENTION";
@@ -387,11 +411,11 @@ const LabResultsCenter = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2"><Heart className="w-4 h-4 text-destructive" style={{ animation: "heartbeat 1s infinite" }} /><span className="text-foreground text-sm">{WEARABLE_DATA.heartRate} bpm</span></div>
-                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><span className="text-foreground text-sm">SpO2: {WEARABLE_DATA.spo2}%</span></div>
-                    <div className="flex items-center gap-2"><Footprints className="w-4 h-4 text-[hsl(var(--accent-green))]" /><span className="text-foreground text-sm">{WEARABLE_DATA.steps.toLocaleString()} steps</span></div>
-                    <div className="flex items-center gap-2"><Moon className="w-4 h-4 text-accent" /><span className="text-foreground text-sm">{WEARABLE_DATA.sleep}h sleep</span></div>
-                    <div className="flex items-center gap-2"><Waves className="w-4 h-4 text-primary" /><span className="text-foreground text-sm">HRV: {WEARABLE_DATA.hrv}ms</span></div>
+                    <div className="flex items-center gap-2"><Heart className="w-4 h-4 text-destructive" style={{ animation: "heartbeat 1s infinite" }} /><span className="text-foreground text-sm">{wearableValues.heartRate} bpm</span></div>
+                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><span className="text-foreground text-sm">SpO2: {wearableValues.spo2}%</span></div>
+                    <div className="flex items-center gap-2"><Footprints className="w-4 h-4 text-[hsl(var(--accent-green))]" /><span className="text-foreground text-sm">{wearableValues.steps.toLocaleString()} steps</span></div>
+                    <div className="flex items-center gap-2"><Moon className="w-4 h-4 text-accent" /><span className="text-foreground text-sm">{wearableValues.sleep}h sleep</span></div>
+                    <div className="flex items-center gap-2"><Waves className="w-4 h-4 text-primary" /><span className="text-foreground text-sm">HRV: {wearableValues.hrv}ms</span></div>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-[hsl(var(--accent-green))]/20 text-[hsl(var(--accent-green))]">✓ Synced — Apple Health</span>
                   </div>
                 )}

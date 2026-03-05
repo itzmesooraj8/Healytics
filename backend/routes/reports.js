@@ -121,7 +121,7 @@ router.post("/analyze", requireAuth, async (req, res) => {
       const { data: report, error: rErr } = await supabase
         .from("lab_reports")
         .insert({
-          user_id: userId === "anonymous" ? null : userId,
+          user_id: userId === "anonymous" || !userId ? null : userId,
           profile_name: profileName,
           report_date: reportDate,
           health_score: healthScore,
@@ -131,6 +131,15 @@ router.post("/analyze", requireAuth, async (req, res) => {
         .select()
         .single();
 
+      // If userId FK fails (user deleted but JWT still valid), retry with null
+      if (rErr && rErr.code === "23503") {
+        const { data: anonReport, error: anonErr } = await supabase
+          .from("lab_reports")
+          .insert({ user_id: null, profile_name: profileName, report_date: reportDate, health_score: healthScore, raw_text: rawText, ai_explanation: aiExplanation })
+          .select().single();
+        if (anonErr) throw anonErr;
+        return res.status(201).json({ report: anonReport, aiExplanation, savedToDatabase: true });
+      }
       if (rErr) throw rErr;
 
       // Insert markers

@@ -126,4 +126,25 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// ────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/forgot-password
+// Body: { email }
+// ────────────────────────────────────────────────────────────────────────────
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "email is required" });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return res.status(400).json({ error: "Invalid email format" });
+
+    // In production this would send a real reset email.
+    // For the demo we always return 200 so user info is not leaked.
+    console.log(`🔑 Password reset requested for: ${email}`);
+    return res.json({ message: "If that email exists, a reset link has been sent." });
+  } catch (err) {
+    console.error("Forgot-password error:", err);
+    res.status(500).json({ error: "Request failed", message: err.message });
+  }
+});
+
 module.exports = router;

@@ -100,7 +100,14 @@ const LoginPage = () => {
             <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
               <input type="checkbox" className="rounded" /> Remember me
             </label>
-            <span className="text-primary cursor-pointer hover:underline">Forgot password?</span>
+            <span
+              className="text-primary cursor-pointer hover:underline"
+              onClick={async () => {
+                if (!email) { toast({ title: "Enter your email first", description: "Type your email address above, then click Forgot password.", variant: "destructive" }); return; }
+                try { await authAPI.forgotPassword(email); } catch { /* always show success to avoid email leakage */ }
+                toast({ title: "📧 Reset Link Sent", description: `If ${email} is registered, a password reset link has been sent.` });
+              }}
+            >Forgot password?</span>
           </div>
           <button
             onClick={handleLogin}

@@ -10,7 +10,15 @@ interface Props {
 }
 
 const PrintSummaryCard = ({ open, onOpenChange, profile, aiExplanation }: Props) => {
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    window.print();
+    // auto-close the dialog once the print dialog is dismissed
+    const handleAfter = () => {
+      onOpenChange(false);
+      window.removeEventListener("afterprint", handleAfter);
+    };
+    window.addEventListener("afterprint", handleAfter);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
