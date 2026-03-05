@@ -11,6 +11,20 @@
 
 ---
 
+## 🎬 Demo Video
+
+> 📹 **[Watch the 3-minute demo on Loom](https://loom.com/share/healytics-demo)** — end-to-end walkthrough: register → upload lab panel → AI explanation → Tamil voice readout → PDF export
+
+**Test credentials (pre-loaded demo account):**
+
+| Field | Value |
+|---|---|
+| Email | `demo@healytics.ai` |
+| Password | `demo1234` |
+| Role | Patient |
+
+---
+
 ## 🌟 What Is Healytics?
 
 Healytics is a full-stack medical intelligence platform that:

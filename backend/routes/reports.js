@@ -84,6 +84,8 @@ const FALLBACK_EXPLANATIONS = {
     "Meena's heart health panel shows several concerning signals. LDL 'bad' cholesterol is critically high and hsCRP indicates significant arterial inflammation. The good news is troponin and BNP are normal — no active cardiac event. However, her cardiovascular risk profile requires immediate medical attention. Always consult your doctor before making any health decisions.",
   vitamin:
     "Priya has multiple severe nutritional deficiencies. Vitamin D, B12, iron, and folate are all critically low, confirming iron-deficiency anemia. This cannot be corrected by diet alone and requires medical supplementation. Always consult your doctor before making any health decisions.",
+  skin_cancer:
+    "These results show several markers that warrant careful follow-up. Elevated S-100B protein and LDH, combined with raised inflammatory markers, are sometimes associated with melanoma surveillance panels. Anaemia and low albumin suggest the body is under significant metabolic stress. These findings must be reviewed by an oncologist or dermatologist urgently. Always consult your doctor before making any health decisions.",
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -105,10 +107,13 @@ router.post("/analyze", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "profileName and markers are required" });
 
     // Call Gemini AI (with fallback)
-    const profileId = profileName.toLowerCase().includes("diab")
+    const pn = profileName.toLowerCase();
+    const profileId = pn.includes("diab")
       ? "diabetic"
-      : profileName.toLowerCase().includes("cardiac")
+      : pn.includes("cardiac")
       ? "cardiac"
+      : pn.includes("skin") || pn.includes("cancer")
+      ? "skin_cancer"
       : "vitamin";
 
     const aiExplanation =

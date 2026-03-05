@@ -266,11 +266,13 @@ const LandingPage = () => {
               <div className="text-primary font-heading text-3xl font-bold mb-1">
                 {s.label === "Average Analysis Time" && "< "}
                 <AnimatedCounter target={s.value} suffix={s.suffix} inView={statsInView} />
+                {(s.label === "Reports Analyzed" || s.label === "Accuracy Rate") && <sup className="text-[10px] text-muted-foreground ml-0.5">*</sup>}
               </div>
               <div className="text-muted-foreground text-xs">{s.label}</div>
             </motion.div>
           ))}
         </div>
+        <p className="text-center text-[11px] text-muted-foreground/60 mt-4">* Projected targets for 2027 based on current trajectory.</p>
       </motion.section>
 
       {/* Features with 3D background */}
