@@ -56,6 +56,8 @@ const LandingPage = () => {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => { document.title = "Healytics — AI-Powered Health Intelligence Platform"; }, []);
   const [statsInView, setStatsInView] = useState(false);
@@ -516,9 +518,24 @@ const LandingPage = () => {
             </div>
           </div>
           {[
-            { title: "Product", links: ["Lab Interpreter", "Voice Readout", "PDF Export", "Wearable Sync"] },
-            { title: "Company", links: ["About", "Careers", "Press", "Contact"] },
-            { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Disclaimer", "HIPAA"] },
+            { title: "Product", links: [
+              { label: "Lab Interpreter",  action: () => navigate("/lab-results") },
+              { label: "Voice Readout",    action: () => navigate("/lab-results") },
+              { label: "PDF Export",       action: () => navigate("/lab-results") },
+              { label: "Wearable Sync",    action: () => navigate("/lab-results") },
+            ]},
+            { title: "Company", links: [
+              { label: "About",    action: () => navigate("/about") },
+              { label: "Careers",  action: () => toast({ title: "We're hiring!", description: "Send your CV to careers@healytics.ai" }) },
+              { label: "Press",    action: () => toast({ title: "Press enquiries", description: "Contact press@healytics.ai for media requests." }) },
+              { label: "Contact",  action: () => navigate("/contact") },
+            ]},
+            { title: "Legal", links: [
+              { label: "Privacy Policy",   action: () => toast({ title: "Privacy Policy", description: "Healytics does not sell your health data. All data is encrypted and HIPAA-compliant." }) },
+              { label: "Terms of Service", action: () => toast({ title: "Terms of Service", description: "By using Healytics you agree to our Terms. For full document email legal@healytics.ai." }) },
+              { label: "Disclaimer",       action: () => toast({ title: "Medical Disclaimer", description: "Healytics is NOT a medical device and does NOT provide diagnoses. Always consult a licensed physician.", variant: "destructive" }) },
+              { label: "HIPAA",            action: () => toast({ title: "HIPAA Compliance", description: "Healytics follows HIPAA guidelines for health data protection. Contact dpo@healytics.ai for queries." }) },
+            ]},
           ].map((col) => (
             <div key={col.title}>
               <h4 className="font-heading font-bold text-foreground mb-3 text-xs uppercase tracking-wider">
@@ -526,8 +543,8 @@ const LandingPage = () => {
               </h4>
               <div className="space-y-2">
                 {col.links.map((link) => (
-                  <p key={link} className="text-muted-foreground text-xs cursor-pointer hover:text-primary transition-colors">
-                    {link}
+                  <p key={link.label} onClick={link.action} className="text-muted-foreground text-xs cursor-pointer hover:text-primary transition-colors">
+                    {link.label}
                   </p>
                 ))}
               </div>

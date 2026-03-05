@@ -41,6 +41,8 @@ const PatientDashboard = () => {
 
   const currentUser = getUser();
   const firstName = currentUser?.name?.split(" ")[0] || "Rajesh";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   useEffect(() => {
     const init = async () => {
@@ -80,7 +82,7 @@ const PatientDashboard = () => {
   return (
     <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="show" className="space-y-6">
       <motion.div variants={fadeUp}>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Good morning, {firstName} 👋</h1>
+        <h1 className="font-heading text-2xl font-bold text-foreground">{greeting}, {firstName} 👋</h1>
         <p className="text-muted-foreground text-sm">{new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
       </motion.div>
 
