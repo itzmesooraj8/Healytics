@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FlaskConical, Mic, FileDown, Activity, Brain, Stethoscope, Shield, Globe, Smartphone } from "lucide-react";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
