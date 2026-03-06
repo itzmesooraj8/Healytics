@@ -3,9 +3,8 @@
 > **Hackathon Project · KARE 2026**  
 > Transforming raw lab results into actionable health insights using Gemini AI, Supabase PostgreSQL, real-time clinical analytics, and multilingual voice readout.
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-healytics--rho.vercel.app-00d4ff?style=flat-square&logo=vercel)](https://healytics-rho.vercel.app)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-itzmesooraj8%2FHealytics-black?style=flat-square&logo=github)](https://github.com/itzmesooraj8/Healytics)
-[![API Health](https://img.shields.io/badge/API-localhost%3A3001-brightgreen?style=flat-square)](http://localhost:3001/api/health)
-[![Frontend](https://img.shields.io/badge/Frontend-localhost%3A8080-blue?style=flat-square)](http://localhost:8080)
 [![DB](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=flat-square)](https://supabase.com)
 [![AI](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-orange?style=flat-square)](https://aistudio.google.com)
 
@@ -15,13 +14,16 @@
 
 > 📹 **[Watch the 3-minute demo on Loom](https://loom.com/share/healytics-demo)** — end-to-end walkthrough: register → upload lab panel → AI explanation → Tamil voice readout → PDF export
 
-**Test credentials (pre-loaded demo account):**
+**🚀 Live Site: [healytics-rho.vercel.app](https://healytics-rho.vercel.app)**
 
-| Field | Value |
-|---|---|
-| Email | `demo@healytics.ai` |
-| Password | `demo1234` |
-| Role | Patient |
+**Test credentials (pre-loaded demo accounts — no registration needed):**
+
+| Role | Email | Password |
+|---|---|---|
+| Patient | `demo@healytics.ai` | `demo1234` |
+| Doctor  | `doctor@healytics.ai` | `demo1234` |
+
+> ✨ Or register any new account at `/register` — works without a backend.
 
 ---
 
@@ -267,11 +269,12 @@ Response:
 
 ## 🎯 Demo Credentials
 
-| Email | Password | Role |
-|---|---|---|
-| `demo@healytics.ai` | `demo1234` | Patient |
+| Email | Password | Role | Dashboard |
+|---|---|---|---|
+| `demo@healytics.ai` | `demo1234` | Patient | `/patient-dashboard` |
+| `doctor@healytics.ai` | `demo1234` | Doctor | `/doctor-dashboard` |
 
-Or register a new account at `/register` — it writes to the live Supabase database in real time.
+> ✨ Or register any new email + password at `/register` — auto-creates an account instantly, no backend needed.
 
 ---
 
